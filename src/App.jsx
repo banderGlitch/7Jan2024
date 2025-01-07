@@ -21,9 +21,6 @@ function App() {
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
           <Layout>
-            <h1 className="text-3xl font-bold underline mb-4 text-center">
-              React + Vite + TailwindCSS + Web3Modal + Wagmi + Hedera + Redux
-            </h1>
           </Layout>
         </QueryClientProvider>
       </WagmiProvider>
