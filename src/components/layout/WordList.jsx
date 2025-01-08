@@ -50,7 +50,7 @@ export default function WordList() {
       <div className="w-8 bg-gray-800 h-full flex flex-col">
         {/* Title Section */}
         <div className="w-full bg-black py-4 border-b border-gray-700 flex justify-center items-center ">
-            <GrPowerReset size={12} className="text-white text-center font-bold cursor-pointer" onClick={handleReset}/>
+            <GrPowerReset size={16} className="text-white text-center font-bold cursor-pointer" onClick={handleReset}/>
         </div>
          {/* Filters Section */}
          <div className="bg-gray-800 flex-grow flex flex-col items-center py-[2px]"> {/* Reduced padding */}
