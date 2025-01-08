@@ -2,7 +2,6 @@ export default function SearchInterface() {
     return (
       <div className="flex flex-col items-center justify-center space-y-8">
         <h1 className="text-2xl font-mono text-gray-300">/// get . your . name</h1>
-        
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <span className="text-gray-500 font-mono">///</span>

@@ -22,7 +22,7 @@ function App() {
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
           <Layout>
-            <div className="h-[calc(100vh-600px)] flex items-center justify-center">
+            <div className="h-[calc(100vh-500px)] flex items-center justify-center">
               <SearchInterface />
             </div>
           </Layout>

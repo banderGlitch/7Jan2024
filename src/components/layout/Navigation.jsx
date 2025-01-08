@@ -4,7 +4,7 @@ export default function Navigation() {
   return (
     <nav className="flex justify-between items-center">
       <h1 className="text-2xl font-bold">
-        deApp
+        W3W
       </h1>
       <ConnectButton />
     </nav>
