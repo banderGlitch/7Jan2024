@@ -1,59 +1,67 @@
 import React, { useState, useEffect } from 'react';
-import Select, { components } from 'react-select';
+import Select from 'react-select';
 import { FixedSizeList as List } from 'react-window';
 
-const CHUNK_SIZE = 500; // Load 500 options at a time
+const CHUNK_SIZE = 3000; // Number of items to load per chunk
 
-export default function DropdownSearch({ placeholder, words }) {
-  const [options, setOptions] = useState([]);
-  const [loadedChunks, setLoadedChunks] = useState(1);
+export default function DropdownSearch({ placeholder, words, onChange }) {
+  const [options, setOptions] = useState([]); // Options to display
+  const [loadedChunks, setLoadedChunks] = useState(1); // Number of chunks loaded
 
-  // Load initial options and chunk handling
+  // Load initial options
   useEffect(() => {
-    const loadChunk = () => {
-      const newChunk = words
-        .slice(0, CHUNK_SIZE * loadedChunks)
-        .map((word) => ({ value: word, label: word }));
-      setOptions(newChunk);
-    };
+    loadMoreOptions();
+  }, []);
 
-    loadChunk();
-  }, [loadedChunks, words]);
+  const loadMoreOptions = () => {
+    const nextChunk = words
+      .slice(0, loadedChunks * CHUNK_SIZE)
+      .map((word) => ({ value: word, label: word }));
 
-  // Load more chunks when scrolled to the bottom
-  const loadMoreChunks = () => {
-    if (loadedChunks * CHUNK_SIZE < words.length) {
-      setLoadedChunks((prev) => prev + 1);
-    }
+    setOptions(nextChunk);
+    setLoadedChunks((prev) => prev + 1);
   };
 
-  // Custom MenuList for virtualization
+  // Handle search input
+  const handleInputChange = (inputValue) => {
+    if (!inputValue) {
+      // Reset to default when input is cleared
+      setOptions(
+        words.slice(0, CHUNK_SIZE).map((word) => ({ value: word, label: word }))
+      );
+      setLoadedChunks(1);
+      return;
+    }
+
+    // Filter options based on input
+    const filtered = words
+      .filter((word) => word.toLowerCase().includes(inputValue.toLowerCase()))
+      .slice(0, 500); // Limit search results to 500 for performance
+
+    setOptions(filtered.map((word) => ({ value: word, label: word })));
+  };
+
+  // Custom MenuList with virtualization
   const MenuList = (props) => {
-    const { options, children, maxHeight, getValue } = props;
-    const [value] = getValue();
-    const initialOffset = options.indexOf(value) * 35;
+    const { options, children, maxHeight } = props;
 
     return (
       <List
         height={maxHeight}
-        itemCount={children.length}
+        itemCount={options.length}
         itemSize={35} // Adjust height of each item
-        initialScrollOffset={initialOffset}
-        onScroll={({ scrollOffset, scrollHeight }) => {
-          if (scrollOffset + maxHeight >= scrollHeight - 50) {
-            loadMoreChunks(); // Load more chunks when near the bottom
-          }
-        }}
         width="100%"
       >
         {({ index, style }) => (
-          <div style={style}>{children[index]}</div>
+          <div style={style}>
+            {children[index]} {/* Virtualized child rendering */}
+          </div>
         )}
       </List>
     );
   };
 
-  // Custom styles for dropdown
+  // Custom styles for the dropdown
   const customStyles = {
     control: (base) => ({
       ...base,
@@ -61,6 +69,10 @@ export default function DropdownSearch({ placeholder, words }) {
       borderColor: '#374151',
       color: '#D1D5DB',
       boxShadow: 'none',
+      width: '180px', // Uniform width for dropdowns
+      height: '40px', // Consistent height
+      borderRadius: '8px', // Rounded corners for a softer look
+      fontSize: '14px', // Uniform font size
       '&:hover': {
         borderColor: '#4B5563',
       },
@@ -71,14 +83,17 @@ export default function DropdownSearch({ placeholder, words }) {
       border: '1px solid #374151',
       zIndex: 1050,
     }),
-    option: (base, { isFocused, isSelected }) => ({
+    option: (base, { isSelected }) => ({
       ...base,
       backgroundColor: isSelected
-        ? '#059669'
-        : isFocused
-        ? '#374151'
+        ? '#059669' // Selected background color
+       // Focused background color
         : '#1f2937',
-      color: '#D1D5DB',
+      color: isSelected ? '#ffffff' : '#D1D5DB', // Selected text color
+    }),
+    singleValue: (base) => ({
+      ...base,
+      color: '#ffffff', // Ensure selected text is visible
     }),
   };
 
@@ -86,110 +101,15 @@ export default function DropdownSearch({ placeholder, words }) {
     <Select
       options={options}
       styles={customStyles}
-      components={{ MenuList }}
+      components={{
+        MenuList, // Override default MenuList
+      }}
       placeholder={placeholder || 'Search...'}
       isClearable
       isSearchable
+      onInputChange={handleInputChange} // Custom input handler
+      onChange={onChange}
     />
   );
 }
 
-// import React from 'react';
-// import Select from 'react-select';
-// import { words } from '../../assets/words'; // Import words array
-
-// export default function DropdownSearch({ placeholder, onChange }) {
-//     // Format words for react-select
-//     const options = words.map((word) => ({
-//         value: word,
-//         label: word,
-//     }));
-
-//     // Custom styles for react-select
-//     const customStyles = {
-//         control: (base) => ({
-//             ...base,
-//             background: '#1f2937',
-//             borderColor: '#374151',
-//             color: '#D1D5DB',
-//             boxShadow: 'none',
-//             '&:hover': {
-//                 borderColor: '#4B5563',
-//             },
-//         }),
-//         menu: (base) => ({
-//             ...base,
-//             background: '#1f2937',
-//             border: '1px solid #374151',
-//             zIndex: 1050, // Ensure it is above other elements
-//             position: 'absolute', // Ensure it renders properly
-//         }),
-//         option: (base, { isFocused, isSelected }) => ({
-//             ...base,
-//             backgroundColor: isSelected
-//                 ? '#059669'
-//                 : isFocused
-//                     ? '#374151'
-//                     : '#1f2937',
-//             color: '#D1D5DB',
-//             '&:active': {
-//                 backgroundColor: '#059669',
-//             },
-//         }),
-//         input: (base) => ({
-//             ...base,
-//             color: '#D1D5DB',
-//         }),
-//         singleValue: (base) => ({
-//             ...base,
-//             color: '#D1D5DB',
-//         }),
-//         dropdownIndicator: (base) => ({
-//             ...base,
-//             color: '#6B7280',
-//             '&:hover': {
-//                 color: '#9CA3AF',
-//             },
-//         }),
-//         clearIndicator: (base) => ({
-//             ...base,
-//             color: '#6B7280',
-//             '&:hover': {
-//                 color: '#9CA3AF',
-//             },
-//         }),
-//     };
-
-//     // Highlight matched text in the dropdown options
-//     const formatOptionLabel = ({ label }, { inputValue }) => {
-//         if (!inputValue) return label;
-
-//         const index = label.toLowerCase().indexOf(inputValue.toLowerCase());
-//         if (index === -1) return label;
-
-//         return (
-//             <>
-//                 {label.slice(0, index)}
-//                 <span className="text-blue-400 font-medium">
-//                     {label.slice(index, index + inputValue.length)}
-//                 </span>
-//                 {label.slice(index + inputValue.length)}
-//             </>
-//         );
-//     };
-
-//     return (
-//         <Select
-//             options={options}
-//             onChange={onChange}
-//             styles={customStyles}
-//             formatOptionLabel={formatOptionLabel}
-//             placeholder={placeholder || 'Search...'}
-//             isClearable
-//             isSearchable
-//             components={{
-//                 IndicatorSeparator: () => null, // Remove separator
-//             }}
-//         />
-//     );
-// }
