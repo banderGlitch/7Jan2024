@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import DropdownSearch from './DropdownSearch';
 import { words } from '../../assets/words'; // Import your 20,000 words
 
-export default function SearchInterface() {
-  const [selectedWords, setSelectedWords] = useState([null, null, null]);
-
+export default function SearchInterface({ selectedWords, setSelectedWords, onSearch }) {
   const handleDropdownChange = (selectedOption, index) => {
     const newSelectedWords = [...selectedWords];
     newSelectedWords[index] = selectedOption;
@@ -30,7 +28,7 @@ export default function SearchInterface() {
           </div>
         ))}
 
-        <button className="bg-green-100 text-green-800 px-6 py-2 rounded-md hover:bg-green-200 transition-colors ml-4">
+        <button className="bg-green-100 text-green-800 px-6 py-2 rounded-md hover:bg-green-200 transition-colors ml-4" onClick={onSearch}>
           Search
         </button>
       </div>

@@ -5,7 +5,7 @@ import { Provider as ReduxProvider } from 'react-redux'
 import { store } from './store'
 import { config, projectId, chains } from './config/web3Config'
 import Layout from './components/layout/Layout'
-import SearchInterface from './components/common/SearchInterface'
+import MainScreen from './mainScreen/mainScreen'
 
 // 3. Create modal
 createWeb3Modal({ wagmiConfig: config, projectId, chains })
@@ -22,9 +22,7 @@ function App() {
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
           <Layout>
-            <div className="h-[calc(100vh-500px)] flex items-center justify-center">
-              <SearchInterface />
-            </div>
+            <MainScreen />
           </Layout>
         </QueryClientProvider>
       </WagmiProvider>
