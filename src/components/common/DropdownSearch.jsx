@@ -61,7 +61,6 @@ export default function DropdownSearch({ placeholder, words, onChange }) {
     );
   };
 
-  // Custom styles for the dropdown
   const customStyles = {
     control: (base) => ({
       ...base,
@@ -87,7 +86,6 @@ export default function DropdownSearch({ placeholder, words, onChange }) {
       ...base,
       backgroundColor: isSelected
         ? '#059669' // Selected background color
-       // Focused background color
         : '#1f2937',
       color: isSelected ? '#ffffff' : '#D1D5DB', // Selected text color
     }),
@@ -95,7 +93,12 @@ export default function DropdownSearch({ placeholder, words, onChange }) {
       ...base,
       color: '#ffffff', // Ensure selected text is visible
     }),
+    input: (base) => ({
+      ...base,
+      color: '#ffffff', // Typing text color
+    }),
   };
+
 
   return (
     <Select
@@ -107,6 +110,7 @@ export default function DropdownSearch({ placeholder, words, onChange }) {
       placeholder={placeholder || 'Search...'}
       isClearable
       isSearchable
+      noOptionsMessage={() => "No matching results"}
       onInputChange={handleInputChange} // Custom input handler
       onChange={onChange}
     />
