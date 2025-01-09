@@ -1,0 +1,22 @@
+{
+    "matches": [
+      {
+        "words": ["world", "wide", "web"],
+        "price": "5.00 USDC",
+        "tier": "Regular",
+        "available": true
+      },
+      {
+        "words": ["win", "win", "win"],
+        "price": "500.00 USDC",
+        "tier": "Ultra-Premium",
+        "available": false
+      },
+      {
+        "words": ["work", "wise", "work"],
+        "price": "50.00 USDC",
+        "tier": "Premium",
+        "available": true
+      }
+    ]
+  }
