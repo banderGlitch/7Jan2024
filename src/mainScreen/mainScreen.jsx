@@ -10,7 +10,6 @@ export default function MainScreen() {
   const [selectedWords, setSelectedWords] = useState([null, null, null]);
   const [searchResults, setSearchResults] = useState(null);
 
-
   const getTierIcon = (tier) => {
     switch (tier) {
       case "Premium":
@@ -22,22 +21,39 @@ export default function MainScreen() {
     }
   };
 
-  const generateRandomWord = (exclude = []) => {
-    let randomWord;
-    do {
-      randomWord = words[Math.floor(Math.random() * words.length)];
-    } while (exclude.includes(randomWord));
-    return randomWord;
+  const getRandomWordsPool = (exclude = [], size = 200) => {
+    const uniqueWords = new Set();
+    while (uniqueWords.size < size) {
+      const word = words[Math.floor(Math.random() * words.length)];
+      if (!exclude.includes(word)) {
+        uniqueWords.add(word);
+      }
+    }
+    return Array.from(uniqueWords);
   };
 
-  const generateSuggestions = (count, userWords) => {
+  const generateRandomSuggestions = (count, pool) => {
     const suggestions = [];
     while (suggestions.length < count) {
-      const suggestionWords = userWords.map((w, i) => (w ? w : generateRandomWord(userWords.concat(suggestions.flatMap(s => s.words)))));
+      const randomWords = Array(3)
+        .fill(null)
+        .map(() => pool[Math.floor(Math.random() * pool.length)]);
+      suggestions.push({
+        words: randomWords,
+        price: "5.00 USDC",
+        available: true, // Always available
+      });
+    }
+    return suggestions;
+  };
+
+  const generateSuggestions = (count, userWords, pool) => {
+    const suggestions = [];
+    while (suggestions.length < count) {
+      const suggestionWords = userWords.map((w, i) => (w ? w : pool[Math.floor(Math.random() * pool.length)]));
       suggestions.push({
         words: suggestionWords,
         price: "5.00 USDC",
-        tier: "Regular",
         available: true,
       });
     }
@@ -46,6 +62,10 @@ export default function MainScreen() {
 
   const handleSearch = () => {
     const userWords = selectedWords.map((w) => w?.value || null);
+    const excludeWords = userWords.filter(Boolean);
+
+    // Pre-filter random words pool to optimize performance
+    const randomWordsPool = getRandomWordsPool(excludeWords, 200);
 
     let exactMatch = null;
     if (userWords.filter(Boolean).length === 3) {
@@ -57,12 +77,12 @@ export default function MainScreen() {
       };
     }
 
-    const suggestions = generateSuggestions(5, userWords);
-
-    console.log("suggestions", suggestions);
+    const randomSuggestionsForExactMatch = generateRandomSuggestions(5, randomWordsPool);
+    const suggestions = userWords.filter(Boolean).length < 3 ? generateSuggestions(5, userWords, randomWordsPool) : [];
 
     setSearchResults({
       exactMatch,
+      randomSuggestionsForExactMatch,
       suggestedResults: suggestions.map((s) => ({
         name: `/// ${s.words.join(" . ")}`,
         price: s.price,
@@ -108,46 +128,223 @@ export default function MainScreen() {
                   </button>
                 </div>
               </div>
+              <div className="space-y-2">
+                <h2 className="text-gray-400 text-sm font-mono">Suggested Results</h2>
+                <div className="space-y-2">
+                  {searchResults.randomSuggestionsForExactMatch.map((suggestion, index) => (
+                    <div
+                      key={index}
+                      className="border border-gray-700 rounded-lg p-4 flex justify-between items-center hover:bg-gray-800/50 transition-colors"
+                    >
+                      <div className="flex items-center space-x-2 text-gray-300 font-mono">
+                        <TiTickOutline className="h-5 w-5 text-green-500" />
+                        <span>{suggestion.words.join(" . ")}</span>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <span className="text-gray-400">{suggestion.price}</span>
+                        <button
+                          className={`px-4 py-1 text-sm text-gray-300 hover:text-white border border-gray-700 rounded-md hover:bg-gray-700`}
+                        >
+                          Select
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 
-          <div className="space-y-2">
-            <h2 className="text-gray-400 text-sm font-mono">Suggested Results</h2>
+          {searchResults.suggestedResults.length > 0 && (
             <div className="space-y-2">
-              {searchResults.suggestedResults.map((result, index) => (
-                <div
-                  key={index}
-                  className="border border-gray-700 rounded-lg p-4 flex justify-between items-center hover:bg-gray-800/50 transition-colors"
-                >
-                  <div className="flex items-center space-x-2 text-gray-300 font-mono">
-                    {result.available ? (
-                      <TiTickOutline className="h-5 w-5 text-green-500" />
-                    ) : (
-                      <RxCrossCircled className="h-5 w-5 text-red-500" />
-                    )}
-                    <span>{result.name.replace("///", "")}</span>
-                    {getTierIcon(result.tier)}
+              <h2 className="text-gray-400 text-sm font-mono">Suggested Results</h2>
+              <div className="space-y-2">
+                {searchResults.suggestedResults.map((result, index) => (
+                  <div
+                    key={index}
+                    className="border border-gray-700 rounded-lg p-4 flex justify-between items-center hover:bg-gray-800/50 transition-colors"
+                  >
+                    <div className="flex items-center space-x-2 text-gray-300 font-mono">
+                      {result.available ? (
+                        <TiTickOutline className="h-5 w-5 text-green-500" />
+                      ) : (
+                        <RxCrossCircled className="h-5 w-5 text-red-500" />
+                      )}
+                      <span>{result.name.replace("///", "")}</span>
+                      {getTierIcon(result.tier)}
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <span className="text-gray-400">{result.price}</span>
+                      <button
+                        className={`px-4 py-1 text-sm text-gray-300 hover:text-white border border-gray-700 rounded-md 
+                          ${result.available ? "hover:bg-gray-700" : "opacity-50 cursor-not-allowed"}`}
+                        disabled={!result.available}
+                      >
+                        {result.available ? "Select" : "Taken"}
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-4">
-                    <span className="text-gray-400">{result.price}</span>
-                    <button
-                      className={`px-4 py-1 text-sm text-gray-300 hover:text-white border border-gray-700 rounded-md 
-                        ${result.available ? "hover:bg-gray-700" : "opacity-50 cursor-not-allowed"}`}
-                      disabled={!result.available}
-                    >
-                      {result.available ? "Select" : "Taken"}
-                    </button>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
-      
     </div>
   );
 }
+
+
+// import React, { useState } from "react";
+// import { TiTickOutline } from "react-icons/ti";
+// import { RxCrossCircled } from "react-icons/rx";
+// import { AiFillStar, AiFillCrown } from "react-icons/ai";
+// import SearchInterface from "../components/common/SearchInterface";
+// import { words } from "../assets/words";
+// import exactMatches from "../assets/exactMatches.json";
+
+// export default function MainScreen() {
+//   const [selectedWords, setSelectedWords] = useState([null, null, null]);
+//   const [searchResults, setSearchResults] = useState(null);
+
+
+//   const getTierIcon = (tier) => {
+//     switch (tier) {
+//       case "Premium":
+//         return <AiFillStar className="h-5 w-5 text-yellow-500" />;
+//       case "Ultra-Premium":
+//         return <AiFillCrown className="h-5 w-5 text-purple-500" />;
+//       default:
+//         return null;
+//     }
+//   };
+
+//   const generateRandomWord = (exclude = []) => {
+//     let randomWord;
+//     do {
+//       randomWord = words[Math.floor(Math.random() * words.length)];
+//     } while (exclude.includes(randomWord));
+//     return randomWord;
+//   };
+
+//   const generateSuggestions = (count, userWords) => {
+//     const suggestions = [];
+//     while (suggestions.length < count) {
+//       const suggestionWords = userWords.map((w, i) => (w ? w : generateRandomWord(userWords.concat(suggestions.flatMap(s => s.words)))));
+//       suggestions.push({
+//         words: suggestionWords,
+//         price: "5.00 USDC",
+//         tier: "Regular",
+//         available: true,
+//       });
+//     }
+//     return suggestions;
+//   };
+
+//   const handleSearch = () => {
+//     const userWords = selectedWords.map((w) => w?.value || null);
+
+//     let exactMatch = null;
+//     if (userWords.filter(Boolean).length === 3) {
+//       exactMatch = {
+//         name: `/// ${userWords.join(" . ")}`,
+//         price: "50.00 USDC",
+//         tier: "Premium",
+//         available: Math.random() > 0.5, // Randomly assign availability
+//       };
+//     }
+
+//     const suggestions = generateSuggestions(5, userWords);
+
+//     console.log("suggestions", suggestions);
+
+//     setSearchResults({
+//       exactMatch,
+//       suggestedResults: suggestions.map((s) => ({
+//         name: `/// ${s.words.join(" . ")}`,
+//         price: s.price,
+//         tier: s.tier,
+//         available: s.available,
+//       })),
+//     });
+//   };
+
+//   return (
+//     <div className="flex flex-col items-center px-4 pt-20 pb-8 max-w-4xl mx-auto">
+//       <div className="w-full mb-8">
+//         <SearchInterface
+//           selectedWords={selectedWords}
+//           setSelectedWords={setSelectedWords}
+//           onSearch={handleSearch}
+//         />
+//       </div>
+
+//       {searchResults && (
+//         <div className="w-full space-y-6">
+//           {searchResults.exactMatch && (
+//             <div className="space-y-2">
+//               <h2 className="text-gray-400 text-sm font-mono">Exact Match</h2>
+//               <div className="border border-gray-700 rounded-lg p-4 flex justify-between items-center hover:bg-gray-800/50 transition-colors">
+//                 <div className="flex items-center space-x-2 text-gray-300 font-mono">
+//                   {searchResults.exactMatch.available ? (
+//                     <TiTickOutline className="h-5 w-5 text-green-500" />
+//                   ) : (
+//                     <RxCrossCircled className="h-5 w-5 text-red-500" />
+//                   )}
+//                   <span>{searchResults.exactMatch.name.replace("///", "")}</span>
+//                   {getTierIcon(searchResults.exactMatch.tier)}
+//                 </div>
+//                 <div className="flex items-center space-x-4">
+//                   <span className="text-gray-400">{searchResults.exactMatch.price}</span>
+//                   <button
+//                     className={`px-4 py-1 text-sm text-gray-300 hover:text-white border border-gray-700 rounded-md 
+//                       ${searchResults.exactMatch.available ? "hover:bg-gray-700" : "opacity-50 cursor-not-allowed"}`}
+//                     disabled={!searchResults.exactMatch.available}
+//                   >
+//                     {searchResults.exactMatch.available ? "Select" : "Taken"}
+//                   </button>
+//                 </div>
+//               </div>
+//             </div>
+//           )}
+
+//           <div className="space-y-2">
+//             <h2 className="text-gray-400 text-sm font-mono">Suggested Results</h2>
+//             <div className="space-y-2">
+//               {searchResults.suggestedResults.map((result, index) => (
+//                 <div
+//                   key={index}
+//                   className="border border-gray-700 rounded-lg p-4 flex justify-between items-center hover:bg-gray-800/50 transition-colors"
+//                 >
+//                   <div className="flex items-center space-x-2 text-gray-300 font-mono">
+//                     {result.available ? (
+//                       <TiTickOutline className="h-5 w-5 text-green-500" />
+//                     ) : (
+//                       <RxCrossCircled className="h-5 w-5 text-red-500" />
+//                     )}
+//                     <span>{result.name.replace("///", "")}</span>
+//                     {getTierIcon(result.tier)}
+//                   </div>
+//                   <div className="flex items-center space-x-4">
+//                     <span className="text-gray-400">{result.price}</span>
+//                     <button
+//                       className={`px-4 py-1 text-sm text-gray-300 hover:text-white border border-gray-700 rounded-md 
+//                         ${result.available ? "hover:bg-gray-700" : "opacity-50 cursor-not-allowed"}`}
+//                       disabled={!result.available}
+//                     >
+//                       {result.available ? "Select" : "Taken"}
+//                     </button>
+//                   </div>
+//                 </div>
+//               ))}
+//             </div>
+//           </div>
+//         </div>
+//       )}
+      
+//     </div>
+//   );
+// }
 
 
 
