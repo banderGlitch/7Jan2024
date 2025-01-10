@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { TiTickOutline } from "react-icons/ti";
 import { RxCrossCircled } from "react-icons/rx";
-import { AiFillStar, AiFillCrown } from "react-icons/ai"; // Add these imports
+import { AiFillStar, AiFillCrown } from "react-icons/ai";
 import SearchInterface from "../components/common/SearchInterface";
 import { words } from "../assets/words";
 import exactMatches from "../assets/exactMatches.json";
@@ -10,23 +10,9 @@ export default function MainScreen() {
   const [selectedWords, setSelectedWords] = useState([null, null, null]);
   const [searchResults, setSearchResults] = useState(null);
 
-  // Helper function to check if words are repeating
-  const getWordRepetitionCount = (words) => {
-    const uniqueWords = new Set(words);
-    return 3 - uniqueWords.size;
-  };
 
-  // Helper function to determine price tier based on repetition
-  const getPriceTier = (words) => {
-    const repetitions = getWordRepetitionCount(words);
-    if (repetitions === 2) return { tier: "Ultra-Premium", price: "500.00 USDC" };
-    if (repetitions === 1) return { tier: "Premium", price: "50.00 USDC" };
-    return { tier: "Regular", price: "5.00 USDC" };
-  };
-
-  // Helper function to get tier icon
   const getTierIcon = (tier) => {
-    switch(tier) {
+    switch (tier) {
       case "Premium":
         return <AiFillStar className="h-5 w-5 text-yellow-500" />;
       case "Ultra-Premium":
@@ -36,71 +22,61 @@ export default function MainScreen() {
     }
   };
 
-  // Helper function to generate random suggestions
-  const generateSuggestions = (count, selectedWordValues) => {
+  const generateRandomWord = (exclude = []) => {
+    let randomWord;
+    do {
+      randomWord = words[Math.floor(Math.random() * words.length)];
+    } while (exclude.includes(randomWord));
+    return randomWord;
+  };
+
+  const generateSuggestions = (count, userWords) => {
     const suggestions = [];
-    const existingExactMatches = new Set(
-      exactMatches.matches.map(match => match.words.join('.'))
-    );
-
-    // Add selected words combination to excluded set if all words are selected
-    if (selectedWordValues.every(word => word)) {
-      existingExactMatches.add(selectedWordValues.join('.'));
-    }
-
     while (suggestions.length < count) {
-      const randomWords = Array(3).fill().map(() => 
-        words[Math.floor(Math.random() * words.length)]
-      );
-      
-      // Skip if this combination exists in exactMatches.json
-      if (existingExactMatches.has(randomWords.join('.'))) {
-        continue;
-      }
-
-      const { tier, price } = getPriceTier(randomWords);
+      const suggestionWords = userWords.map((w, i) => (w ? w : generateRandomWord(userWords.concat(suggestions.flatMap(s => s.words)))));
       suggestions.push({
-        words: randomWords,
-        price,
-        tier,
-        available: Math.random() > 0.3 // 70% chance of being available
+        words: suggestionWords,
+        price: "5.00 USDC",
+        tier: "Regular",
+        available: true,
       });
     }
     return suggestions;
   };
 
   const handleSearch = () => {
-    const selectedWordValues = selectedWords.map(w => w?.value || '');
-    
-    // Check for exact matches
-    const exactMatch = exactMatches.matches.find(match => 
-      match.words.every((word, index) => word === selectedWordValues[index])
-    );
+    const userWords = selectedWords.map((w) => w?.value || null);
 
-    // Generate suggested results
-    const suggestions = generateSuggestions(5, selectedWordValues);
+    let exactMatch = null;
+    if (userWords.filter(Boolean).length === 3) {
+      exactMatch = {
+        name: `/// ${userWords.join(" . ")}`,
+        price: "50.00 USDC",
+        tier: "Premium",
+        available: Math.random() > 0.5, // Randomly assign availability
+      };
+    }
+
+    const suggestions = generateSuggestions(5, userWords);
+
+    console.log("suggestions", suggestions);
 
     setSearchResults({
-      exactMatch: exactMatch ? {
-        name: `/// ${exactMatch.words.join(' . ')}`,
-        price: exactMatch.price,
-        available: exactMatch.available,
-        tier: exactMatch.tier
-      } : null,
-      suggestedResults: suggestions.map(suggestion => ({
-        name: `/// ${suggestion.words.join(' . ')}`,
-        price: suggestion.price,
-        available: suggestion.available,
-        tier: getPriceTier(suggestion.words).tier
-      }))
+      exactMatch,
+      suggestedResults: suggestions.map((s) => ({
+        name: `/// ${s.words.join(" . ")}`,
+        price: s.price,
+        tier: s.tier,
+        available: s.available,
+      })),
     });
   };
 
   return (
     <div className="flex flex-col items-center px-4 pt-20 pb-8 max-w-4xl mx-auto">
       <div className="w-full mb-8">
-        <SearchInterface 
-          selectedWords={selectedWords} 
+        <SearchInterface
+          selectedWords={selectedWords}
           setSelectedWords={setSelectedWords}
           onSearch={handleSearch}
         />
@@ -108,7 +84,6 @@ export default function MainScreen() {
 
       {searchResults && (
         <div className="w-full space-y-6">
-          {/* Exact Match Section */}
           {searchResults.exactMatch && (
             <div className="space-y-2">
               <h2 className="text-gray-400 text-sm font-mono">Exact Match</h2>
@@ -119,29 +94,28 @@ export default function MainScreen() {
                   ) : (
                     <RxCrossCircled className="h-5 w-5 text-red-500" />
                   )}
-                  <span>{searchResults.exactMatch.name.replace('///', '')}</span>
+                  <span>{searchResults.exactMatch.name.replace("///", "")}</span>
                   {getTierIcon(searchResults.exactMatch.tier)}
                 </div>
                 <div className="flex items-center space-x-4">
                   <span className="text-gray-400">{searchResults.exactMatch.price}</span>
-                  <button 
+                  <button
                     className={`px-4 py-1 text-sm text-gray-300 hover:text-white border border-gray-700 rounded-md 
-                      ${searchResults.exactMatch.available ? 'hover:bg-gray-700' : 'opacity-50 cursor-not-allowed'}`}
+                      ${searchResults.exactMatch.available ? "hover:bg-gray-700" : "opacity-50 cursor-not-allowed"}`}
                     disabled={!searchResults.exactMatch.available}
                   >
-                    {searchResults.exactMatch.available ? 'Select' : 'Taken'}
+                    {searchResults.exactMatch.available ? "Select" : "Taken"}
                   </button>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Suggested Results Section */}
           <div className="space-y-2">
             <h2 className="text-gray-400 text-sm font-mono">Suggested Results</h2>
             <div className="space-y-2">
               {searchResults.suggestedResults.map((result, index) => (
-                <div 
+                <div
                   key={index}
                   className="border border-gray-700 rounded-lg p-4 flex justify-between items-center hover:bg-gray-800/50 transition-colors"
                 >
@@ -151,17 +125,17 @@ export default function MainScreen() {
                     ) : (
                       <RxCrossCircled className="h-5 w-5 text-red-500" />
                     )}
-                    <span>{result.name.replace('///', '')}</span>
+                    <span>{result.name.replace("///", "")}</span>
                     {getTierIcon(result.tier)}
                   </div>
                   <div className="flex items-center space-x-4">
                     <span className="text-gray-400">{result.price}</span>
-                    <button 
+                    <button
                       className={`px-4 py-1 text-sm text-gray-300 hover:text-white border border-gray-700 rounded-md 
-                        ${result.available ? 'hover:bg-gray-700' : 'opacity-50 cursor-not-allowed'}`}
+                        ${result.available ? "hover:bg-gray-700" : "opacity-50 cursor-not-allowed"}`}
                       disabled={!result.available}
                     >
-                      {result.available ? 'Select' : 'Taken'}
+                      {result.available ? "Select" : "Taken"}
                     </button>
                   </div>
                 </div>
@@ -170,9 +144,17 @@ export default function MainScreen() {
           </div>
         </div>
       )}
+      
     </div>
   );
 }
+
+
+
+
+
+
+
 // import React, { useState } from "react";
 // import { TiTickOutline } from "react-icons/ti";
 // import { RxCrossCircled } from "react-icons/rx";
