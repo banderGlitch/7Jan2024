@@ -13,12 +13,19 @@ export default function MainScreen() {
   const getTierIcon = (tier) => {
     switch (tier) {
       case "Premium":
-        return <AiFillStar className="h-5 w-5 text-yellow-500" />;
+        return <p className="text-yellow-500">Premium</p>;
       case "Ultra-Premium":
-        return <AiFillCrown className="h-5 w-5 text-purple-500" />;
+        return <p className="text-purple-500">Ultra-Premium</p>;
       default:
         return null;
     }
+  };
+
+  const getTier = (words) => {
+    const uniqueWords = new Set(words);
+    if (uniqueWords.size === 1) return "Ultra-Premium";
+    if (uniqueWords.size === 2) return "Premium";
+    return "Regular";
   };
 
   const getRandomWordsPool = (exclude = [], size = 200) => {
@@ -41,6 +48,7 @@ export default function MainScreen() {
       suggestions.push({
         words: randomWords,
         price: "5.00 USDC",
+        tier: getTier(randomWords),
         available: true, // Always available
       });
     }
@@ -54,6 +62,7 @@ export default function MainScreen() {
       suggestions.push({
         words: suggestionWords,
         price: "5.00 USDC",
+        tier: getTier(suggestionWords),
         available: true,
       });
     }
@@ -72,7 +81,7 @@ export default function MainScreen() {
       exactMatch = {
         name: `/// ${userWords.join(" . ")}`,
         price: "50.00 USDC",
-        tier: "Premium",
+        tier: getTier(userWords),
         available: Math.random() > 0.5, // Randomly assign availability
       };
     }
@@ -139,6 +148,7 @@ export default function MainScreen() {
                       <div className="flex items-center space-x-2 text-gray-300 font-mono">
                         <TiTickOutline className="h-5 w-5 text-green-500" />
                         <span>{suggestion.words.join(" . ")}</span>
+                        {getTierIcon(suggestion.tier)}
                       </div>
                       <div className="flex items-center space-x-4">
                         <span className="text-gray-400">{suggestion.price}</span>
