@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import { TiTickOutline } from "react-icons/ti";
 import { RxCrossCircled } from "react-icons/rx";
-import { AiFillStar, AiFillCrown } from "react-icons/ai";
 import SearchInterface from "../components/common/SearchInterface";
 import { words } from "../assets/words";
-import exactMatches from "../assets/exactMatches.json";
 
 export default function MainScreen() {
   const [selectedWords, setSelectedWords] = useState([null, null, null]);
