@@ -74,7 +74,7 @@ export default function WordList() {
               rel="noopener noreferrer"
               className="text-blue-500 hover:text-white underline"
             >
-              BEP-31 wordlist
+              BIP-31 wordlist
             </a>
           </span>
         </div>
