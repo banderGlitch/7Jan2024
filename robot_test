@@ -1,0 +1,447 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyOAcP142KZhasejyicXXRTl",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/banderGlitch/7Jan2024/blob/test/robot_test\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "!pip install nest-asyncio"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "3R0h2bcKVh6H",
+        "outputId": "6e9be625-ebdf-446d-b15d-3d2e292b2283"
+      },
+      "execution_count": 8,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Requirement already satisfied: nest-asyncio in /usr/local/lib/python3.11/dist-packages (1.6.0)\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "pip install bleak"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "gCtxc_aEU2Fm",
+        "outputId": "20d07a33-0ef0-4581-f05d-0c195dae0263"
+      },
+      "execution_count": 4,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Collecting bleak\n",
+            "  Downloading bleak-0.22.3-py3-none-any.whl.metadata (5.4 kB)\n",
+            "Collecting dbus-fast<3,>=1.83.0 (from bleak)\n",
+            "  Downloading dbus_fast-2.32.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (10 kB)\n",
+            "Requirement already satisfied: typing-extensions>=4.7.0 in /usr/local/lib/python3.11/dist-packages (from bleak) (4.12.2)\n",
+            "Downloading bleak-0.22.3-py3-none-any.whl (142 kB)\n",
+            "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m142.7/142.7 kB\u001b[0m \u001b[31m3.5 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hDownloading dbus_fast-2.32.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (4.4 MB)\n",
+            "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m4.4/4.4 MB\u001b[0m \u001b[31m42.2 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hInstalling collected packages: dbus-fast, bleak\n",
+            "Successfully installed bleak-0.22.3 dbus-fast-2.32.0\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "pip install python-telegram-bot --upgrade"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "Ll1rWvC7Ulf_",
+        "outputId": "56169e0b-6b7a-48b7-a2fc-b92fa6f4b19d"
+      },
+      "execution_count": 2,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Collecting python-telegram-bot\n",
+            "  Downloading python_telegram_bot-21.10-py3-none-any.whl.metadata (17 kB)\n",
+            "Requirement already satisfied: httpx~=0.27 in /usr/local/lib/python3.11/dist-packages (from python-telegram-bot) (0.28.1)\n",
+            "Requirement already satisfied: anyio in /usr/local/lib/python3.11/dist-packages (from httpx~=0.27->python-telegram-bot) (3.7.1)\n",
+            "Requirement already satisfied: certifi in /usr/local/lib/python3.11/dist-packages (from httpx~=0.27->python-telegram-bot) (2024.12.14)\n",
+            "Requirement already satisfied: httpcore==1.* in /usr/local/lib/python3.11/dist-packages (from httpx~=0.27->python-telegram-bot) (1.0.7)\n",
+            "Requirement already satisfied: idna in /usr/local/lib/python3.11/dist-packages (from httpx~=0.27->python-telegram-bot) (3.10)\n",
+            "Requirement already satisfied: h11<0.15,>=0.13 in /usr/local/lib/python3.11/dist-packages (from httpcore==1.*->httpx~=0.27->python-telegram-bot) (0.14.0)\n",
+            "Requirement already satisfied: sniffio>=1.1 in /usr/local/lib/python3.11/dist-packages (from anyio->httpx~=0.27->python-telegram-bot) (1.3.1)\n",
+            "Downloading python_telegram_bot-21.10-py3-none-any.whl (669 kB)\n",
+            "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m669.5/669.5 kB\u001b[0m \u001b[31m9.0 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hInstalling collected packages: python-telegram-bot\n",
+            "Successfully installed python-telegram-bot-21.10\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 1,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 1000
+        },
+        "id": "K7_fqn5HUUl6",
+        "outputId": "58ee2eaf-9644-4060-cd4f-c2c6dc831190"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "<ipython-input-1-33a0c2c2598c>:61: UserWarning: frames=None which we can infer the length of, did not pass an explicit *save_count* and passed cache_frame_data=True.  To avoid a possibly unbounded cache, frame data caching has been disabled. To suppress this warning either pass `cache_frame_data=False` or `save_count=MAX_FRAMES`.\n",
+            "  ani = FuncAnimation(fig, update, init_func=init, blit=True, interval=1000)\n"
+          ]
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<Figure size 640x480 with 1 Axes>"
+            ],
+            "image/png": "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FSt0+PBh5eTk6KabbtLHH39sb/+bb77Rv/71L7399tu/+/s0BkQNAKDJmjVrltLS0jR58mR72csvv6zExERt375dZ599tlq0aKHg4GC53W6f58bExBy17NduuOEGffjhh+rVq5fcbrd69Oih3r1767//+7/t7z3Kz89Xdna28vLyJEmpqamaMWOGevXqpWeffdY+anLFFVfonnvukSSNGjVK06dP1/Lly9W2bVvt2rVLqampuvDCC+VwONS6dWt7DgUFBfryyy9VXFysxMRESdIrr7yic845R2vXrlXXrl0lHTna88orr+j000//k+9oYBE1AIATEhkarC0P9wnYa/vDpk2btHz5ckVFRR21bufOnTr77LNPeNvBwcGaM2eOJk6cqGXLlqmoqEiTJ0/WlClTtGbNGsXHx2vTpk364osvNH/+fPt5lmXZX0nRvn17SdK5555rr3c4HHK73SovL5d05COySy+9VG3btlVWVpb+9re/6bLLLpMkbd26VYmJiXbQSFKHDh0UExOjrVu32lHTunXrRh80ElEDADhBDofDLx8BBVJlZaWuuuoqTZky5ah18fHxfnmNv/zlL7r11lt166236pFHHtHZZ5+t2bNna8KECaqsrNRdd92l++6776jnJSUl2f87NDTUZ53D4VBdXZ0kqUuXLiouLtYHH3yg//3f/9WNN96ozMxMvfXWW/WeY/PmzU/wtzu1NO5/jQAA/AldunTRv/71LyUnJ9f7qibpSGScyBVMLVu2VHx8vH0icJcuXbRlyxadddZZx72tX4uOjtZNN92km266Sddff72ysrK0d+9etW/f3j7H5pejNVu2bFFFRYU6dOjwp17zVETUAACM5/F4jrppXlxcnHJycvTCCy/o5ptv1siRIxUbG6tvvvlGr7/+ul588cXfPWk2OTlZBQUF6tmzp8LDw9WyZcujxjz33HPauHGjrr32WrVp00aHDh3SK6+8oq+++kozZ86UdOT8mB49eig3N1d33nmnmjdvri1btmjp0qWaNWtWvX63J554QvHx8UpLS1NQUJAWLFggt9utmJgYZWZmqlOnTsrOztaTTz6pw4cP65577lGvXr2Unp5+fG9iI8Al3QAA43388cdKS0vzeUyYMEEJCQn69NNPVVtbq8suu0ydOnVSXl6eYmJi/vCLGadNm6alS5cqMTFRaWlpxxzTrVs3VVZW6u6779Y555yjXr16afXq1Vq0aJF69eol6ci5MitWrND27dv117/+VWlpaRo/frwSEhLq/bu1aNFCU6dOVXp6urp27arvvvtO77//voKCguRwOPTOO++oZcuWuuiii5SZmakzzzxTb7zxxvG9gY2Ew/Lnxf4nidfrldPplMfjsc8gBwA0rEOHDqm4uLjR38sEDeuP/p009N9vjtQAAAAjEDUAAMAIRA0AADACUQMAAIxA1AAAACMQNQAAwAhEDQAAMAJRAwAAjEDUAAAAIxA1AIAm77vvvpPD4Tjq+6H+yNy5cxUTE9Ngc8LxI2oAAEYbOHCgHA6HHA6HQkNDlZKSopEjR+rQoUP2mMTERO3evVsdO3b0+2v37dv3P47bs2ePhgwZoqSkJIWHh8vtdqtPnz769NNP/Tof0/Et3QAA42VlZWnOnDmqqanR+vXrNWDAADkcDk2ZMkWSFBwcLLfbHbD59evXT9XV1Zo3b57OPPNMlZWVqaCgQD///HPA5lQfNTU1Cg0NDfQ0bBypAQCcGMuSqvcH5nGc38X8y9GPxMRE9e3bV5mZmVq6dKm9/lgfP7377rtKTU1VRESELr74Ys2bN08Oh0MVFRU+2/7www/Vvn17RUVFKSsrS7t375YkPfTQQ5o3b57eeecd+0jRxx9/fNTcKioq9Mknn2jKlCm6+OKL1bp1a3Xr1k1jxozR1Vdf7TPuzjvv1Omnn67o6Ghdcskl2rRpk73+oYceUufOnfWPf/xDycnJcjqd6t+/v/bt22ePeeutt9SpUydFRkYqLi5OmZmZ2r9/vySprq5ODz/8sM444wyFh4erc+fOWrJkyVHv0RtvvKFevXopIiJC8+fPP6790NA4UgMAODE1B6TJCYF57Qd/lMKan9BTN2/erM8++0ytW7f+3THFxcW6/vrrNXToUN15553asGGDRowYcdS4AwcO6PHHH9c//vEPBQUF6ZZbbtGIESM0f/58jRgxQlu3bpXX69WcOXMkSbGxsUdtIyoqSlFRUVq0aJF69Oih8PDwY87phhtuUGRkpD744AM5nU4999xz6t27t7Zv325vd+fOnVq0aJEWL16sf//737rxxhv16KOPatKkSdq9e7duvvlmTZ06Vddee6327dunTz75RNb/D8SnnnpK06ZN03PPPae0tDS9/PLLuvrqq/XVV18pNTXVnsfo0aM1bdo0paWlnXLf1k7UAACMt3jxYkVFRenw4cOqqqpSUFCQZs2a9bvjn3vuObVt21aPPfaYJKlt27bavHmzJk2a5DOupqZGs2fPVps2bSRJubm5evjhhyUdiZXIyEhVVVX94UdbISEhmjt3rgYNGqTZs2erS5cu6tWrl/r3769zzz1XkrRq1SqtWbNG5eXldvQ8/vjjWrRokd566y0NHjxY0pGjLXPnzlWLFi0kSbfeeqsKCgrsqDl8+LCuu+46O+g6depkz+Pxxx/XqFGj1L9/f0nSlClTtHz5cj355JN6+umn7XF5eXm67rrr/tNbHhBEDQDgxIQ2O3LEJFCvfRwuvvhiPfvss9q/f7+mT5+ukJAQ9evX73fHb9u2TV27dvVZ1q1bt6PGNWvWzA4aSYqPj1d5eflxzU06ck7NlVdeqU8++USrV6/WBx98oKlTp+rFF1/UwIEDtWnTJlVWViouLs7neQcPHtTOnTvtn5OTk+2g+e18zjvvPPXu3VudOnVSnz59dNlll+n6669Xy5Yt5fV69eOPP6pnz54+2+/Zs6fPR1ySlJ6efty/38lC1AAATozDccIfAZ1szZs311lnnSVJevnll3XeeefppZde0h133PGntvvbk2QdDof9cc7xioiI0KWXXqpLL71U48aN05133qm///3vGjhwoCorKxUfH3/Mc3J+fVn5seZTV1cn6cjJ0EuXLtVnn32mjz76SDNnztTYsWNVVFR0VCz9kebNT919zonCAIAmJSgoSA8++KD+53/+RwcPHjzmmLZt22rdunU+y9auXXvcrxUWFqba2toTmmeHDh3sk3i7dOmi0tJShYSE6KyzzvJ5nHbaafXepsPhUM+ePTVhwgRt2LBBYWFhWrhwoaKjo5WQkHDUJeSffvqpOnTocELzDwSiBgDQ5Nxwww0KDg72OVfk1+666y59/fXXGjVqlLZv364333xTc+fOlXQkDOorOTlZX3zxhbZt26affvpJNTU1R435+eefdckll+jVV1/VF198oeLiYi1YsEBTp07VNddcI0nKzMxURkaG+vbtq48++kjfffedPvvsM40dO/ao+Po9RUVFmjx5statW6ddu3bp7bff1p49e9S+fXtJ0gMPPKApU6bojTfe0LZt2zR69Ght3LhRQ4cOrffvG2h8/AQAaHJCQkKUm5urqVOnasiQ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ps/y9evXq6amxmd5u3btlJSUpMLCwmNuKz8/X06n034kJiY21LQBAEAj1SBR8/rrr+vzzz9Xfn7+UetKS0sVFhammJgYn+Uul0ulpaXH3N6YMWPk8XjsR0lJSUNMGwAANGIh/t5gSUmJhg4dqqVLlyoiIsIv2wwPD1d4eLhftgUAAMzk9yM169evV3l5ubp06aKQkBCFhIRoxYoVmjFjhkJCQuRyuVRdXa2Kigqf55WVlcntdvt7OgAAoInw+5Ga3r1768svv/RZdtttt6ldu3YaNWqUEhMTFRoaqoKCAvXr10+StG3bNu3atUsZGRn+ng4AAGgi/B41LVq0UMeOHX2WNW/eXHFxcfbyO+64Q8OGDVNsbKyio6N17733KiMjQz169PD3dAAAQBPh96ipj+nTpysoKEj9+vVTVVWV+vTpo2eeeSYQUwEAAIZwWJZlBXoSx8vr9crpdMrj8Sg6OjrQ0wEAAPXQ0H+/+e4nAABgBKIGAAAYgagBAABGIGoAAIARiBoAAGAEogYAABiBqAEAAEYgagAAgBGIGgAAYASiBgAAGIGoAQAARiBqAACAEYgaAABgBKIGAAAYgagBAABGIGoAAIARiBoAAGAEogYAABiBqAEAAEYgagAAgBGIGgAAYASiBgAAGIGoAQAARiBqAACAEYgaAABgBKIGAAAYgagBAABGIGoAAIARiBoAAGAEogYAABiBqAEAAEYgagAAgBGIGgAAYASiBgAAGIGoAQAARiBqAACAEYgaAABgBKIGAAAYgagBAABGIGoAAIARiBoAAGAEogYAABiBqAEAAEYgagAAgBGIGgAAYASiBgAAGIGoAQAARiBqAACAEYgaAABgBKIGAAAYgagBAABGIGoAAIARiBoAAGAEogYAABiBqAEAAEYgagAAgBGIGgAAYASiBgAAGIGoAQAARiBqAACAEYgaAABgBKIGAAAYgagBAABG8HvU5Ofnq2vXrmrRooVatWqlvn37atu2bT5jDh06pJycHMXFxSkqKkr9+vVTWVmZv6cCAACaEL9HzYoVK5STk6PVq1dr6dKlqqmp0WWXXab9+/fbY+6//3699957WrBggVasWKEff/xR1113nb+nAgAAmhCHZVlWQ77Anj171KpVK61YsUIXXXSRPB6PTj/9dL322mu6/vrrJUlff/212rdvr8LCQvXo0eOobVRV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aP369faYZcuWqa6u7vi/5PpPneYcAK+//roVHh5uzZ0719qyZYs1ePBgKyYmxiotLQ301Iw2ZMgQy+l0Wh9//LG1e/du+3HgwAF7zN13320lJSVZy5Yts9atW2dlZGRYGRkZAZx10/Drq58si/1wMq1Zs8YKCQmxJk2aZO3YscOaP3++1axZM+vVV1+1xzz66KNWTEyM9c4771hffPGFdc0113AZcQMYMGCA9Ze//MW+pPvtt9+2TjvtNGvkyJH2GPZFw9i3b5+1YcMGa8OGDZYk64knnrA2bNhgff/995Zl1e99z8rKstLS0qyioiJr1apVVmpqatO4pNuyLGvmzJlWUlKSFRYWZnXr1s1avXp1oKdkPEnHfMyZM8cec/DgQeuee+6xWrZsaTVr1sy69tprrd27dwdu0k3Eb6OG/XByvffee1bHjh2t8PBwq127dtbzzz/vs76urs4aN26c5XK5rPDwcKt3797Wtm3bAjRbc3m9Xmvo0KFWUlKSFRERYZ155pnW2LFjraqqKnsM+6JhLF++/Jh/HwYMGGBZVv3e959//tm6+eabraioKCs6Otq67bbbrH379h33XByW9avbLQIAADRSjeqcGgAAgN9D1AAAACMQNQAAwAhEDQAAMAJRAwAAjEDUAAAAIxA1AADACEQNAAAwAlEDAACMQNQAAAAjEDUAAMAI/w9RebHKKYZwIwAAAABJRU5ErkJggg==\n"
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "WARNING:root:Could not determine BlueZ version, bluetoothctl not available, assuming 5.51+\n",
+            "ERROR:telegram.ext.Application:No error handlers are registered, logging exception.\n",
+            "Traceback (most recent call last):\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/telegram/ext/_application.py\", line 1325, in process_update\n",
+            "    await coroutine\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/telegram/ext/_handlers/basehandler.py\", line 158, in handle_update\n",
+            "    return await self.callback(update, context)\n",
+            "           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+            "  File \"<ipython-input-1-33a0c2c2598c>\", line 84, in button\n",
+            "    await send_bluetooth_command(START_COMMAND)\n",
+            "  File \"<ipython-input-1-33a0c2c2598c>\", line 36, in send_bluetooth_command\n",
+            "    async with BleakClient(DEVICE_ADDRESS) as client:\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/bleak/__init__.py\", line 570, in __aenter__\n",
+            "    await self.connect()\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/bleak/__init__.py\", line 615, in connect\n",
+            "    return await self._backend.connect(**kwargs)\n",
+            "           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/bleak/backends/bluezdbus/client.py\", line 134, in connect\n",
+            "    device = await BleakScanner.find_device_by_address(\n",
+            "             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/bleak/__init__.py\", line 388, in find_device_by_address\n",
+            "    return await cls.find_device_by_filter(\n",
+            "           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/bleak/__init__.py\", line 444, in find_device_by_filter\n",
+            "    async with cls(**kwargs) as scanner:\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/bleak/__init__.py\", line 158, in __aenter__\n",
+            "    await self._backend.start()\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/bleak/backends/bluezdbus/scanner.py\", line 168, in start\n",
+            "    manager = await get_global_bluez_manager()\n",
+            "              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/bleak/backends/bluezdbus/manager.py\", line 1058, in get_global_bluez_manager\n",
+            "    await instance.async_init()\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/bleak/backends/bluezdbus/manager.py\", line 243, in async_init\n",
+            "    bus = MessageBus(bus_type=BusType.SYSTEM, auth=get_dbus_authenticator())\n",
+            "          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/dbus_fast/aio/message_bus.py\", line 200, in __init__\n",
+            "    super().__init__(bus_address, bus_type, ProxyObject, negotiate_unix_fd)\n",
+            "  File \"src/dbus_fast/message_bus.py\", line 169, in dbus_fast.message_bus.BaseMessageBus.__init__\n",
+            "  File \"src/dbus_fast/message_bus.py\", line 736, in dbus_fast.message_bus.BaseMessageBus._setup_socket\n",
+            "  File \"src/dbus_fast/message_bus.py\", line 709, in dbus_fast.message_bus.BaseMessageBus._setup_socket\n",
+            "FileNotFoundError: [Errno 2] No such file or directory\n",
+            "ERROR:telegram.ext.Application:No error handlers are registered, logging exception.\n",
+            "Traceback (most recent call last):\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/telegram/ext/_application.py\", line 1325, in process_update\n",
+            "    await coroutine\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/telegram/ext/_handlers/basehandler.py\", line 158, in handle_update\n",
+            "    return await self.callback(update, context)\n",
+            "           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+            "  File \"<ipython-input-1-33a0c2c2598c>\", line 84, in button\n",
+            "    await send_bluetooth_command(START_COMMAND)\n",
+            "  File \"<ipython-input-1-33a0c2c2598c>\", line 36, in send_bluetooth_command\n",
+            "    async with BleakClient(DEVICE_ADDRESS) as client:\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/bleak/__init__.py\", line 570, in __aenter__\n",
+            "    await self.connect()\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/bleak/__init__.py\", line 615, in connect\n",
+            "    return await self._backend.connect(**kwargs)\n",
+            "           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/bleak/backends/bluezdbus/client.py\", line 134, in connect\n",
+            "    device = await BleakScanner.find_device_by_address(\n",
+            "             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/bleak/__init__.py\", line 388, in find_device_by_address\n",
+            "    return await cls.find_device_by_filter(\n",
+            "           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/bleak/__init__.py\", line 444, in find_device_by_filter\n",
+            "    async with cls(**kwargs) as scanner:\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/bleak/__init__.py\", line 158, in __aenter__\n",
+            "    await self._backend.start()\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/bleak/backends/bluezdbus/scanner.py\", line 168, in start\n",
+            "    manager = await get_global_bluez_manager()\n",
+            "              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/bleak/backends/bluezdbus/manager.py\", line 1058, in get_global_bluez_manager\n",
+            "    await instance.async_init()\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/bleak/backends/bluezdbus/manager.py\", line 243, in async_init\n",
+            "    bus = MessageBus(bus_type=BusType.SYSTEM, auth=get_dbus_authenticator())\n",
+            "          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+            "  File \"/usr/local/lib/python3.11/dist-packages/dbus_fast/aio/message_bus.py\", line 200, in __init__\n",
+            "    super().__init__(bus_address, bus_type, ProxyObject, negotiate_unix_fd)\n",
+            "  File \"src/dbus_fast/message_bus.py\", line 169, in dbus_fast.message_bus.BaseMessageBus.__init__\n",
+            "  File \"src/dbus_fast/message_bus.py\", line 736, in dbus_fast.message_bus.BaseMessageBus._setup_socket\n",
+            "  File \"src/dbus_fast/message_bus.py\", line 709, in dbus_fast.message_bus.BaseMessageBus._setup_socket\n",
+            "FileNotFoundError: [Errno 2] No such file or directory\n"
+          ]
+        },
+        {
+          "output_type": "error",
+          "ename": "RuntimeError",
+          "evalue": "Cannot close a running event loop",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mSystemExit\u001b[0m                                Traceback (most recent call last)",
+            "\u001b[0;32m/usr/local/lib/python3.11/dist-packages/telegram/ext/_application.py\u001b[0m in \u001b[0;36m__run\u001b[0;34m(self, updater_coroutine, stop_signals, close_loop)\u001b[0m\n\u001b[1;32m   1087\u001b[0m                 \u001b[0;32mif\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mupdater\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mrunning\u001b[0m\u001b[0;34m:\u001b[0m  \u001b[0;31m# type: ignore[union-attr]\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m-> 1088\u001b[0;31m                     \u001b[0mloop\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mrun_until_complete\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mupdater\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mstop\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m)\u001b[0m  \u001b[0;31m# type: ignore[union-attr]\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m   1089\u001b[0m                 \u001b[0;32mif\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mrunning\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.11/dist-packages/nest_asyncio.py\u001b[0m in \u001b[0;36mrun_until_complete\u001b[0;34m(self, future)\u001b[0m\n\u001b[1;32m     91\u001b[0m             \u001b[0;32mwhile\u001b[0m \u001b[0;32mnot\u001b[0m \u001b[0mf\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mdone\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 92\u001b[0;31m                 \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_run_once\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m     93\u001b[0m                 \u001b[0;32mif\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_stopping\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.11/dist-packages/nest_asyncio.py\u001b[0m in \u001b[0;36m_run_once\u001b[0;34m(self)\u001b[0m\n\u001b[1;32m    132\u001b[0m                 \u001b[0;32mtry\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 133\u001b[0;31m                     \u001b[0mhandle\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_run\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    134\u001b[0m                 \u001b[0;32mfinally\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/lib/python3.11/asyncio/events.py\u001b[0m in \u001b[0;36m_run\u001b[0;34m(self)\u001b[0m\n\u001b[1;32m     83\u001b[0m         \u001b[0;32mtry\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 84\u001b[0;31m             \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_context\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mrun\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_callback\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m*\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_args\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m     85\u001b[0m         \u001b[0;32mexcept\u001b[0m \u001b[0;34m(\u001b[0m\u001b[0mSystemExit\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mKeyboardInterrupt\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.11/dist-packages/telegram/ext/_application.py\u001b[0m in \u001b[0;36m_raise_system_exit\u001b[0;34m()\u001b[0m\n\u001b[1;32m    448\u001b[0m     \u001b[0;32mdef\u001b[0m \u001b[0m_raise_system_exit\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;34m->\u001b[0m \u001b[0mNoReturn\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 449\u001b[0;31m         \u001b[0;32mraise\u001b[0m \u001b[0mSystemExit\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    450\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mSystemExit\u001b[0m: ",
+            "\nDuring handling of the above exception, another exception occurred:\n",
+            "\u001b[0;31mRuntimeError\u001b[0m                              Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-1-33a0c2c2598c>\u001b[0m in \u001b[0;36m<cell line: 0>\u001b[0;34m()\u001b[0m\n\u001b[1;32m    126\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    127\u001b[0m \u001b[0;32mif\u001b[0m \u001b[0m__name__\u001b[0m \u001b[0;34m==\u001b[0m \u001b[0;34m'__main__'\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 128\u001b[0;31m     \u001b[0mmain\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m",
+            "\u001b[0;32m<ipython-input-1-33a0c2c2598c>\u001b[0m in \u001b[0;36mmain\u001b[0;34m()\u001b[0m\n\u001b[1;32m    123\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    124\u001b[0m     \u001b[0;31m# Start the Bot\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 125\u001b[0;31m     \u001b[0mapplication\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mrun_polling\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    126\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    127\u001b[0m \u001b[0;32mif\u001b[0m \u001b[0m__name__\u001b[0m \u001b[0;34m==\u001b[0m \u001b[0;34m'__main__'\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.11/dist-packages/telegram/ext/_application.py\u001b[0m in \u001b[0;36mrun_polling\u001b[0;34m(self, poll_interval, timeout, bootstrap_retries, read_timeout, write_timeout, connect_timeout, pool_timeout, allowed_updates, drop_pending_updates, close_loop, stop_signals)\u001b[0m\n\u001b[1;32m    866\u001b[0m             \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mcreate_task\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mprocess_error\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0merror\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mexc\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mupdate\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;32mNone\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    867\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 868\u001b[0;31m         return self.__run(\n\u001b[0m\u001b[1;32m    869\u001b[0m             updater_coroutine=self.updater.start_polling(\n\u001b[1;32m    870\u001b[0m                 \u001b[0mpoll_interval\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mpoll_interval\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.11/dist-packages/telegram/ext/_application.py\u001b[0m in \u001b[0;36m__run\u001b[0;34m(self, updater_coroutine, stop_signals, close_loop)\u001b[0m\n\u001b[1;32m   1097\u001b[0m             \u001b[0;32mfinally\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1098\u001b[0m                 \u001b[0;32mif\u001b[0m \u001b[0mclose_loop\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m-> 1099\u001b[0;31m                     \u001b[0mloop\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mclose\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m   1100\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1101\u001b[0m     def create_task(\n",
+            "\u001b[0;32m/usr/lib/python3.11/asyncio/unix_events.py\u001b[0m in \u001b[0;36mclose\u001b[0;34m(self)\u001b[0m\n\u001b[1;32m     66\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     67\u001b[0m     \u001b[0;32mdef\u001b[0m \u001b[0mclose\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 68\u001b[0;31m         \u001b[0msuper\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mclose\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m     69\u001b[0m         \u001b[0;32mif\u001b[0m \u001b[0;32mnot\u001b[0m \u001b[0msys\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mis_finalizing\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     70\u001b[0m             \u001b[0;32mfor\u001b[0m \u001b[0msig\u001b[0m \u001b[0;32min\u001b[0m \u001b[0mlist\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_signal_handlers\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/lib/python3.11/asyncio/selector_events.py\u001b[0m in \u001b[0;36mclose\u001b[0;34m(self)\u001b[0m\n\u001b[1;32m     86\u001b[0m     \u001b[0;32mdef\u001b[0m \u001b[0mclose\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     87\u001b[0m         \u001b[0;32mif\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mis_running\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 88\u001b[0;31m             \u001b[0;32mraise\u001b[0m \u001b[0mRuntimeError\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"Cannot close a running event loop\"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m     89\u001b[0m         \u001b[0;32mif\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mis_closed\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     90\u001b[0m             \u001b[0;32mreturn\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mRuntimeError\u001b[0m: Cannot close a running event loop"
+          ]
+        }
+      ],
+      "source": [
+        "import pytz\n",
+        "import tzlocal\n",
+        "\n",
+        "# Patch tzlocal.get_localzone to return a pytz timezone (UTC in this example)\n",
+        "tzlocal.get_localzone = lambda: pytz.timezone('UTC')\n",
+        "\n",
+        "from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup\n",
+        "from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, CallbackContext, ContextTypes\n",
+        "import asyncio\n",
+        "from bleak import BleakClient\n",
+        "import matplotlib.pyplot as plt\n",
+        "from matplotlib.animation import FuncAnimation\n",
+        "import threading\n",
+        "import nest_asyncio  # Import nest_asyncio\n",
+        "import logging\n",
+        "\n",
+        "# Apply nest_asyncio to allow nested event loops\n",
+        "nest_asyncio.apply()\n",
+        "\n",
+        "# 7820249480:AAEoH7GPL8hQ1gkbf_A7mWmyHkgu2Eb2WoE\n",
+        "# telegram bot token\n",
+        "\n",
+        "# Bluetooth Configuration\n",
+        "DEVICE_ADDRESS = 'C4:AC:AA:EE:5F:25'  # Replace with your Bluetooth device address\n",
+        "SERVICE_UUID = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'  # Replace with your service UUID\n",
+        "START_COMMAND = b'start'\n",
+        "STOP_COMMAND = b'stop'\n",
+        "\n",
+        "# Global Variables\n",
+        "left_sensor_data = []\n",
+        "right_sensor_data = []\n",
+        "running = False\n",
+        "\n",
+        "# Bluetooth Functions\n",
+        "async def send_bluetooth_command(command: bytes):\n",
+        "    async with BleakClient(DEVICE_ADDRESS) as client:\n",
+        "        await client.write_gatt_char(SERVICE_UUID, command)\n",
+        "\n",
+        "# Graph Plotting\n",
+        "fig, ax = plt.subplots()\n",
+        "\n",
+        "# Initialize the plot lines\n",
+        "left_line, = ax.plot([], [], label='Left Sensor')\n",
+        "right_line, = ax.plot([], [], label='Right Sensor')\n",
+        "ax.legend()\n",
+        "\n",
+        "def init():\n",
+        "    ax.set_xlim(0, 100)\n",
+        "    ax.set_ylim(0, 100)\n",
+        "    return left_line, right_line\n",
+        "\n",
+        "def update(frame):\n",
+        "    if len(left_sensor_data) > 100:\n",
+        "        left_sensor_data.pop(0)\n",
+        "        right_sensor_data.pop(0)\n",
+        "    left_line.set_data(range(len(left_sensor_data)), left_sensor_data)\n",
+        "    right_line.set_data(range(len(right_sensor_data)), right_sensor_data)\n",
+        "    return left_line, right_line\n",
+        "\n",
+        "def start_plotting():\n",
+        "    ani = FuncAnimation(fig, update, init_func=init, blit=True, interval=1000)\n",
+        "    plt.show()\n",
+        "\n",
+        "# Telegram Bot Functions\n",
+        "async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:\n",
+        "    \"\"\"Sends a message with three inline buttons attached.\"\"\"\n",
+        "    keyboard = [\n",
+        "        [InlineKeyboardButton(\"Start\", callback_data='start')],\n",
+        "        [InlineKeyboardButton(\"Stop\", callback_data='stop')]\n",
+        "    ]\n",
+        "    reply_markup = InlineKeyboardMarkup(keyboard)\n",
+        "    await update.message.reply_text('Control Panel:', reply_markup=reply_markup)\n",
+        "\n",
+        "async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:\n",
+        "    \"\"\"Parses the CallbackQuery and updates the message text.\"\"\"\n",
+        "    global running\n",
+        "    query = update.callback_query\n",
+        "\n",
+        "    if query is not None:  # Check if query is not None\n",
+        "        await query.answer()\n",
+        "\n",
+        "        if query.data == 'start':\n",
+        "            running = True\n",
+        "            await send_bluetooth_command(START_COMMAND)\n",
+        "            if query.message is not None:\n",
+        "                await query.edit_message_text(text=\"Started\")\n",
+        "            else:\n",
+        "                logging.warning(\"query.message is None\")\n",
+        "        elif query.data == 'stop':\n",
+        "            running = False\n",
+        "            await send_bluetooth_command(STOP_COMMAND)\n",
+        "            if query.message is not None:\n",
+        "                await query.edit_message_text(text=\"Stopped\")\n",
+        "            else:\n",
+        "                logging.warning(\"query.message is None\")\n",
+        "    else:\n",
+        "        logging.warning(\"update.callback_query is None\")  # Log if query is None\n",
+        "\n",
+        "\n",
+        "\n",
+        "# Background Task to Simulate Data (Replace with actual Bluetooth data reading)\n",
+        "def sensor_data_simulation():\n",
+        "    import random\n",
+        "    import time  # Use time.sleep for synchronous sleeping\n",
+        "    while True:\n",
+        "        if running:\n",
+        "            left_sensor_data.append(random.randint(0, 100))\n",
+        "            right_sensor_data.append(random.randint(0, 100))\n",
+        "        time.sleep(1)\n",
+        "\n",
+        "# Main Function\n",
+        "def main():\n",
+        "    # Telegram Bot Setup\n",
+        "    application = ApplicationBuilder().token(\"7820249480:AAEoH7GPL8hQ1gkbf_A7mWmyHkgu2Eb2WoE\").build()\n",
+        "\n",
+        "    # Add handlers\n",
+        "    application.add_handler(CommandHandler(\"start\", start))\n",
+        "    application.add_handler(CallbackQueryHandler(button))\n",
+        "\n",
+        "    # Start the sensor data simulation and plotting in separate threads\n",
+        "    threading.Thread(target=sensor_data_simulation, daemon=True).start()\n",
+        "    threading.Thread(target=start_plotting, daemon=True).start()\n",
+        "\n",
+        "    # Start the Bot\n",
+        "    application.run_polling()\n",
+        "\n",
+        "if __name__ == '__main__':\n",
+        "    main()\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "python -m\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 141
+        },
+        "id": "EKpXKwtoenOc",
+        "outputId": "44e65113-a001-451d-fade-460da46bd2f9"
+      },
+      "execution_count": 2,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'python' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-2-f0f064628843>\u001b[0m in \u001b[0;36m<cell line: 0>\u001b[0;34m()\u001b[0m\n\u001b[0;32m----> 1\u001b[0;31m \u001b[0mpython\u001b[0m \u001b[0;34m-\u001b[0m\u001b[0mm\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m: name 'python' is not defined"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import sys\n",
+        "\n",
+        "print(sys.version)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "uJbR7thAepKP",
+        "outputId": "138d6a93-776d-484f-bba3-0cd57a6cd8c7"
+      },
+      "execution_count": 3,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "3.11.11 (main, Dec  4 2024, 08:55:07) [GCC 11.4.0]\n"
+          ]
+        }
+      ]
+    }
+  ]
+}
